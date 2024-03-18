@@ -149,8 +149,8 @@ ifeq ($(OVERRIDE_UPDATE),)
 endif
 
 test:
-ifneq ($(wildcard ${PYTHON_MODULE_NAME}/tests/.),)
-	@echo 'error: no benchmark available'
+ifeq ($(wildcard ${PYTHON_MODULE_NAME}/tests/.),)
+	@echo 'error: no tests available'
 	@exit 1
 else
 	$(VENV_ACTIVATE) \
@@ -223,7 +223,7 @@ endif
 
 # This serves both as benchmark and as fuzzer.
 benchmark:
-ifneq ($(wildcard docs/.),)
+ifeq ($(wildcard docs/.),)
 	@echo 'error: no benchmark available'
 	@exit 1
 else
