@@ -1,0 +1,231 @@
+#
+# Makefile
+#
+# MIT License
+#
+# Copyright (C) 2024 Franco Masotti (see /README.md)
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+ARCH := $$(uname --kernel-name --kernel-release --kernel-version --machine)
+
+# See
+# https://docs.python.org/3/library/venv.html#how-venvs-work
+VENV_NEW := python3 -m venv .venv
+VENV_ACTIVATE := . .venv/bin/activate
+VENV_DEACTIVATE := deactivate
+
+include project.mk
+
+default: install-dev
+
+# Build the docs if the directory exists.
+doc:
+ifeq ($(wildcard docs/.),)
+	@echo 'error: no docs available'
+	@exit 1
+else
+	$(VENV_ACTIVATE) \
+		&& $(MAKE) -C docs html \
+		&& $(MAKE) -C docs latexpdf; \
+		$(VENV_DEACTIVATE)
+endif
+
+install:
+	# pip 23 introduced the '--break-system-packages' option.
+	python3 -c 'import pip; import sys; sys.exit(0) if int(pip.__version__.split(".")[0]) >= 23 else sys.exit(1)' \
+		&& pip3 install --break-system-packages --disable-pip-version-check  . --user \
+		|| pip3 install --disable-pip-version-check  . --user
+
+uninstall:
+	# pip 23 introduced the '--break-system-packages' option.
+	python3 -c 'import pip; import sys; sys.exit(0) if int(pip.__version__.split(".")[0]) >= 23 else sys.exit(1)' \
+		&& pip3 uninstall --break-system-packages --disable-pip-version-check --verbose --yes $(PYTHON_MODULE_NAME) \
+		|| pip3 uninstall --disable-pip-version-check --verbose --yes $(PYTHON_MODULE_NAME)
+
+# Check if the remote requirements have the same hashes as the local ones.
+# This signals if at least one remote dependency has been tampered with since
+# the last pip freeze operation.
+check-requirements:
+	$(VENV_ACTIVATE) \
+		&& pip install \
+		--require-virtualenv \
+		--requirement requirements-freeze.txt \
+		--require-hashes \
+		--no-deps \
+		--no-cache-dir \
+		--target .fake-env \
+		--dry-run; \
+		$(VENV_DEACTIVATE)
+
+install-dev:
+	$(VENV_NEW)
+	$(VENV_ACTIVATE) \
+		&& { python3 -c 'import pip; import sys; sys.exit(0) if int(pip.__version__.split(".")[0]) >= 23 else sys.exit(1)' \
+		&& pip install \
+		--disable-pip-version-check \
+		--require-virtualenv \
+		--requirement requirements-freeze.txt \
+		--require-hashes \
+		--no-deps \
+		|| pip install \
+		--require-virtualenv \
+		--requirement requirements-freeze.txt \
+		--require-hashes \
+		--no-deps ; }; \
+		$(VENV_DEACTIVATE)
+	$(VENV_ACTIVATE) \
+		&& pre-commit install; \
+		$(VENV_DEACTIVATE)
+	$(VENV_ACTIVATE) \
+		&& pre-commit install --hook-type commit-msg; \
+		$(VENV_DEACTIVATE)
+
+# Add hashes to the freeze file be re-downloading the packages locally and
+# generating their hashes locally.
+# Generate both SHA512 and SHA256 hashes, then "mix" them together in the
+# same output file along with package names and versions.
+# Assume that each package has one corresponding file only.
+regenerate-freeze: regenerate-freeze-no-hashes
+	$(VENV_NEW)
+	$(VENV_ACTIVATE) \
+		&& mkdir .pip-hashes \
+		&& cd .pip-hashes \
+		&& pip download --require-virtualenv --disable-pip-version-check --requirement ../requirements-freeze.txt \
+		&& find . \
+		-type f \
+		-regex "\(.*\.whl\|.*\.tar\.gz\)" \
+		-not -name "setuptools*" \
+		-exec pip hash --algorithm sha512 --no-color {} \; \
+		-exec pip hash --algorithm sha256 --no-color {} \; \
+		| sed -n 'n;p' > raw_hashes.txt \
+		&& cat raw_hashes.txt \
+		| paste -sd '?\n' > tmp.hashes \
+		&& paste -d '| ' ../requirements-freeze.txt tmp.hashes | sed 's/|/ \\\n    /g' | sed 's/?/ \\\n    /g' > req.freeze \
+		&& cd .. \
+		&& mv .pip-hashes/req.freeze requirements-freeze.txt \
+		&& sed -i "1i# Frozen with: $(ARCH)/" requirements-freeze.txt \
+		&& rm -rf .pip-hashes; \
+		$(VENV_DEACTIVATE)
+
+regenerate-freeze-no-hashes: uninstall-dev
+	$(VENV_NEW)
+	$(VENV_ACTIVATE) \
+		&& pip install --require-virtualenv --disable-pip-version-check --requirement requirements.txt --requirement requirements-dev.txt \
+		&& pip freeze --require-virtualenv --disable-pip-version-check --local > requirements-freeze.txt; \
+		$(VENV_DEACTIVATE)
+
+uninstall-dev:
+	rm -rf .venv .pip-hashes
+
+update: install-dev
+	$(VENV_ACTIVATE) \
+		&& pre-commit autoupdate \
+			--repo https://github.com/pre-commit/pre-commit-hooks \
+			--repo https://github.com/PyCQA/bandit \
+			--repo https://github.com/pycqa/isort \
+			--repo https://codeberg.org/frnmst/licheck \
+			--repo https://codeberg.org/frnmst/md-toc \
+			--repo https://github.com/mgedmin/check-manifest \
+			--repo https://github.com/jorisroovers/gitlint; \
+		$(VENV_DEACTIVATE)
+
+test:
+ifneq ($(wildcard ${PYTHON_MODULE_NAME}/tests/.),)
+	@echo 'error: no benchmark available'
+	@exit 1
+else
+	$(VENV_ACTIVATE) \
+		&& tox run-parallel; \
+		$(VENV_DEACTIVATE)
+endif
+
+fuzzer:
+ifeq ($(wildcard ${PYTHON_MODULE_NAME}/tests/fuzzer.py),)
+	@echo 'error: no fuzzer available'
+	@exit 1
+else
+	$(VENV_ACTIVATE) \
+		&& tox run -e fuzzer; \
+		$(VENV_DEACTIVATE)
+endif
+
+pre-commit:
+	$(VENV_ACTIVATE) \
+		&& pre-commit run --all; \
+		$(VENV_DEACTIVATE)
+
+demo:
+ifeq ($(wildcard asciinema/.),)
+	@echo 'error: no demo available'
+	@exit 1
+else
+	$(VENV_ACTIVATE) \
+		&& asciinema/md_toc_asciinema_$$(git describe --tags $$(git rev-list --tags --max-count=1) | tr '.' '_')_demo.sh; \
+		$(VENV_DEACTIVATE)
+endif
+
+dist:
+	# Create a reproducible archive at least on the wheel.
+	# See
+	# https://bugs.python.org/issue31526
+	# https://bugs.python.org/issue38727
+	# https://github.com/pypa/setuptools/issues/1468
+	# https://github.com/pypa/setuptools/issues/2133
+	# https://reproducible-builds.org/docs/source-date-epoch/
+	$(VENV_ACTIVATE) \
+		&& SOURCE_DATE_EPOCH=$$(git -c log.showSignature='false' log -1 --pretty=%ct) \
+		python -m build; \
+		$(VENV_DEACTIVATE)
+	$(VENV_ACTIVATE) \
+		&& twine check --strict dist/*; \
+		$(VENV_DEACTIVATE)
+
+upload:
+	$(VENV_ACTIVATE) \
+		&& twine upload --repository $(PROJECT_NAME) dist/*; \
+		$(VENV_DEACTIVATE)
+
+clean:
+	rm -rf build dist *.egg-info tests/benchmark-results
+	# Remove all markdown files except the readmes.
+	find -regex "\(.*/crash-[a-f0-9]+\|.*\.[mM][dD]\)$$" \
+		! -name 'README.md' \
+		! -name 'CONTRIBUTING.md' \
+		! -name 'SECURITY.md' \
+		! -path './.venv/*' \
+		! -path './.git/*' -type f -exec rm -f {} +
+ifneq ($(wildcard docs/.),)
+	$(VENV_ACTIVATE) \
+		&& $(MAKE) -C docs clean; \
+		$(VENV_DEACTIVATE)
+endif
+
+# This serves both as benchmark and as fuzzer.
+benchmark:
+ifneq ($(wildcard docs/.),)
+	@echo 'error: no benchmark available'
+	@exit 1
+else
+	$(VENV_ACTIVATE) \
+		&& python3 -m md_toc.tests.benchmark; \
+		$(VENV_DEACTIVATE)
+endif
+
+.PHONY: default doc install uninstall install-dev uninstall-dev update test clean demo benchmark pre-commit regenerate-freeze regenerate-freeze-no-hashes
