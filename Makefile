@@ -31,7 +31,7 @@ VENV_NEW := python3 -m venv .venv
 VENV_ACTIVATE := . .venv/bin/activate
 VENV_DEACTIVATE := deactivate
 
-include project.mk
+include .project.mk
 
 default: install-dev
 
@@ -134,7 +134,8 @@ regenerate-freeze-no-hashes: uninstall-dev
 uninstall-dev:
 	rm -rf .venv .pip-hashes
 
-update: install-dev
+update:: install-dev
+ifeq ($(OVERRIDE_UPDATE),)
 	$(VENV_ACTIVATE) \
 		&& pre-commit autoupdate \
 			--repo https://github.com/pre-commit/pre-commit-hooks \
@@ -145,6 +146,7 @@ update: install-dev
 			--repo https://github.com/mgedmin/check-manifest \
 			--repo https://github.com/jorisroovers/gitlint; \
 		$(VENV_DEACTIVATE)
+endif
 
 test:
 ifneq ($(wildcard ${PYTHON_MODULE_NAME}/tests/.),)
@@ -202,7 +204,8 @@ upload:
 		&& twine upload --repository $(PROJECT_NAME) dist/*; \
 		$(VENV_DEACTIVATE)
 
-clean:
+clean::
+ifeq ($(OVERRIDE_CLEAN),)
 	rm -rf build dist *.egg-info tests/benchmark-results
 	# Remove all markdown files except the readmes.
 	find -regex "\(.*/crash-[a-f0-9]+\|.*\.[mM][dD]\)$$" \
@@ -215,6 +218,7 @@ ifneq ($(wildcard docs/.),)
 	$(VENV_ACTIVATE) \
 		&& $(MAKE) -C docs clean; \
 		$(VENV_DEACTIVATE)
+endif
 endif
 
 # This serves both as benchmark and as fuzzer.

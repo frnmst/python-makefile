@@ -8,3 +8,8 @@ bootstrap:
 # Add extra targets here.
 example-target:
 	@echo "This is an example target"
+
+# Override targets in the Makefile.
+OVERRIDE_CLEAN := true
+clean::
+	rm -rf .build/
