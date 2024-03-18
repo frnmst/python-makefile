@@ -177,7 +177,7 @@ ifeq ($(wildcard asciinema/.),)
 	@exit 1
 else
 	$(VENV_ACTIVATE) \
-		&& asciinema/md_toc_asciinema_$$(git describe --tags $$(git rev-list --tags --max-count=1) | tr '.' '_')_demo.sh; \
+		&& asciinema/$(PYTHON_MODULE_NAME)_asciinema_$$(git describe --tags $$(git rev-list --tags --max-count=1) | tr '.' '_')_demo.sh; \
 		$(VENV_DEACTIVATE)
 endif
 
@@ -224,7 +224,7 @@ ifneq ($(wildcard docs/.),)
 	@exit 1
 else
 	$(VENV_ACTIVATE) \
-		&& python3 -m md_toc.tests.benchmark; \
+		&& python3 -m $(PYTHON_MODULE_NAME).tests.benchmark; \
 		$(VENV_DEACTIVATE)
 endif
 
