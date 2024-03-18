@@ -9,6 +9,7 @@ TODO
 ## Features
 
 - setup development environment using venv
+- freeze requirements with hashes
 - install and uninstall locally
 - run tests, benchmarks, fuzzer and demo
 - upload to PyPI
@@ -36,4 +37,11 @@ Download the makefile
 
 ```
 make -f .project.mk bootstrap
+```
+
+Now you can run your operations, for example
+
+```shell
+make install-dev
+make test
 ```
