@@ -1,6 +1,6 @@
 # python-makefile
 
-A Makefile to be used or automating Python development operations
+A Makefile to be used for automating Python development operations
 
 ## Description
 
