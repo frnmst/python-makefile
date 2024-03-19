@@ -163,7 +163,9 @@ ifeq ($(wildcard ${PYTHON_MODULE_NAME}/tests/tests.py),)
 	@echo 'error: no tests available'
 	@exit 1
 else
-	python -m unittest md_toc.tests.tests --failfast --locals --verbose
+	$(VENV_ACTIVATE) \
+		&& python -m unittest md_toc.tests.tests --failfast --locals --verbose; \
+		$(VENV_DEACTIVATE)
 endif
 
 fuzzer:
