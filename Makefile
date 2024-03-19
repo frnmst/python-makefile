@@ -149,13 +149,21 @@ ifeq ($(OVERRIDE_UPDATE),)
 endif
 
 test:
-ifeq ($(wildcard ${PYTHON_MODULE_NAME}/tests/.),)
+ifeq ($(wildcard ${PYTHON_MODULE_NAME}/tests/tests.py),)
 	@echo 'error: no tests available'
 	@exit 1
 else
 	$(VENV_ACTIVATE) \
 		&& tox run-parallel; \
 		$(VENV_DEACTIVATE)
+endif
+
+test-single:
+ifeq ($(wildcard ${PYTHON_MODULE_NAME}/tests/tests.py),)
+	@echo 'error: no tests available'
+	@exit 1
+else
+	python -m unittest md_toc.tests.tests --failfast --locals --verbose
 endif
 
 fuzzer:
@@ -223,7 +231,7 @@ endif
 
 # This serves both as benchmark and as fuzzer.
 benchmark:
-ifeq ($(wildcard docs/.),)
+ifeq ($(wildcard $(PYTHON_MODULE_NAME)/tests/benchmark.py),)
 	@echo 'error: no benchmark available'
 	@exit 1
 else
@@ -232,4 +240,12 @@ else
 		$(VENV_DEACTIVATE)
 endif
 
-.PHONY: default doc install uninstall install-dev uninstall-dev update test clean demo benchmark pre-commit regenerate-freeze regenerate-freeze-no-hashes
+datadog:
+ifeq ($(wildcard /usr/bin/docker),)
+	@echo 'error: docker not installed'
+	@exit 1
+else
+	docker run --rm -v $$(pwd):/src/ ghcr.io/datadog/guarddog pypi verify /src/requirements-freeze.txt
+endif
+
+.PHONY: default doc install uninstall install-dev uninstall-dev update test clean demo benchmark pre-commit regenerate-freeze regenerate-freeze-no-hashes datadog
