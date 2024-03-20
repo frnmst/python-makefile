@@ -24,6 +24,8 @@
 # SOFTWARE.
 
 ARCH := $$(uname --kernel-name --kernel-release --kernel-version --machine)
+PYTHON_VERSION := $$(python --version)
+PIP_VERSION := $$(pip --version | awk '{print $$1,$$2}')
 
 # See
 # https://docs.python.org/3/library/venv.html#how-venvs-work
@@ -120,7 +122,7 @@ regenerate-freeze: regenerate-freeze-no-hashes
 		&& paste -d '| ' ../requirements-freeze.txt tmp.hashes | sed 's/|/ \\\n    /g' | sed 's/?/ \\\n    /g' > req.freeze \
 		&& cd .. \
 		&& mv .pip-hashes/req.freeze requirements-freeze.txt \
-		&& sed -i "1i# Frozen with: $(ARCH)/" requirements-freeze.txt \
+		&& sed -i "1i# Frozen with: $(ARCH)~$(PYTHON_VERSION)~$(PIP_VERSION)" requirements-freeze.txt \
 		&& rm -rf .pip-hashes; \
 		$(VENV_DEACTIVATE)
 
