@@ -38,7 +38,8 @@ include .project.mk
 default: install-dev
 
 # Build the docs if the directory exists.
-doc:
+doc::
+ifeq ($(OVERRIDE_DOC),)
 ifeq ($(wildcard docs/.),)
 	@echo 'error: no docs available'
 	@exit 1
@@ -48,18 +49,23 @@ else
 		&& $(MAKE) -C docs latexpdf; \
 		$(VENV_DEACTIVATE)
 endif
+endif
 
-install:
+install::
+ifeq ($(OVERRIDE_INSTALL),)
 	# pip 23 introduced the '--break-system-packages' option.
 	python3 -c 'import pip; import sys; sys.exit(0) if int(pip.__version__.split(".")[0]) >= 23 else sys.exit(1)' \
 		&& pip3 install --break-system-packages --disable-pip-version-check  . --user \
 		|| pip3 install --disable-pip-version-check  . --user
+endif
 
-uninstall:
+uninstall::
+ifeq ($(OVERRIDE_UNINSTALL),)
 	# pip 23 introduced the '--break-system-packages' option.
 	python3 -c 'import pip; import sys; sys.exit(0) if int(pip.__version__.split(".")[0]) >= 23 else sys.exit(1)' \
 		&& pip3 uninstall --break-system-packages --disable-pip-version-check --verbose --yes $(PYTHON_MODULE_NAME) \
 		|| pip3 uninstall --disable-pip-version-check --verbose --yes $(PYTHON_MODULE_NAME)
+endif
 
 # Check if the remote requirements have the same hashes as the local ones.
 # This signals if at least one remote dependency has been tampered with since
