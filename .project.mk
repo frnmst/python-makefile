@@ -4,19 +4,10 @@
 # https://software.franco.net.eu.org/frnmst/python-makefile
 
 # Change these two. Required.
-PROJECT_NAME := md-toc
-PYTHON_MODULE_NAME := md_toc
+PROJECT_NAME := python-makefile
+PYTHON_MODULE_NAME := python_makefile
 
 # Required.
-MAKEFILE_SOURCE := https://software.franco.net.eu.org/frnmst/python-makefile/raw/branch/master/Makefile
+MAKEFILE_SOURCE := https://software.franco.net.eu.org/frnmst/python-makefile/raw/branch/master/Makefile.example
 bootstrap:
 	curl -o Makefile $(MAKEFILE_SOURCE)
-
-# Add extra targets here. Optional.
-example-target:
-	@echo "This is an example target"
-
-# Override targets in the Makefile. Optional.
-OVERRIDE_CLEAN := true
-clean::
-	rm -rf .build/

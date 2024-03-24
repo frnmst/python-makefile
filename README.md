@@ -36,7 +36,7 @@ Python projects.
 | `make install-dev` | Install the development environment | ✘ | |
 | `make pre-commit` | Run all pre-commit hooks | ✘ | |
 | `make regenerate-freeze` | Same as `make regenerate-freeze-no-hashes` and adds checksum to the pinned requirements files | ✘ | |
-| `make regenerate-freeze-no-hashes` | Essentially do a `pip freeze` on the development environment | |
+| `make regenerate-freeze-no-hashes` | Just do a `pip freeze` on the development environment | ✘ | |
 | `make test` | Run unit tests for all Python versions defined in `./setup.cfg`. Must be in `${PYTHON_MODULE_NAME}/tests/tests.py` | ✘ | |
 | `make test-single` | Run unit tests for the default Python version. Must be in `${PYTHON_MODULE_NAME}/tests/tests.py` | ✘ | |
 | `make update` | Update pre-commit hooks | ✓ | `OVERRIDE_UPDATE` |
@@ -46,7 +46,7 @@ Python projects.
 
 ## Example
 
-Create a [`.project.mk`](./.project.mk) file in your repository. In this
+Create a [`.project.mk`](./.project.mk.example) file in your repository. In this
 example we are setting up the
 [md-toc](https://software.franco.net.eu.org/frnmst/md-toc) project.
 
