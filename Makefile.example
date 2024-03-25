@@ -74,7 +74,7 @@ check-requirements:
 	$(VENV_ACTIVATE) \
 		&& pip install \
 		--require-virtualenv \
-		--requirement requirements-freeze.txt \
+		--requirement .requirements-freeze-hashes.txt \
 		--require-hashes \
 		--no-deps \
 		--no-cache-dir \
@@ -90,12 +90,10 @@ install-dev:
 		--disable-pip-version-check \
 		--require-virtualenv \
 		--requirement requirements-freeze.txt \
-		--require-hashes \
 		--no-deps \
 		|| pip install \
 		--require-virtualenv \
 		--requirement requirements-freeze.txt \
-		--require-hashes \
 		--no-deps ; }; \
 		$(VENV_DEACTIVATE)
 	$(VENV_ACTIVATE) \
@@ -127,8 +125,8 @@ regenerate-freeze: regenerate-freeze-no-hashes
 		| paste -sd '?\n' > tmp.hashes \
 		&& paste -d '| ' ../requirements-freeze.txt tmp.hashes | sed 's/|/ \\\n    /g' | sed 's/?/ \\\n    /g' > req.freeze \
 		&& cd .. \
-		&& mv .pip-hashes/req.freeze requirements-freeze.txt \
-		&& sed -i "1i# Frozen with: $(ARCH)~$(PYTHON_VERSION)~$(PIP_VERSION)" requirements-freeze.txt \
+		&& mv .pip-hashes/req.freeze .requirements-freeze-hashes.txt \
+		&& sed -i "1i# Frozen with: $(ARCH)~$(PYTHON_VERSION)~$(PIP_VERSION)" .requirements-freeze-hashes.txt \
 		&& rm -rf .pip-hashes; \
 		$(VENV_DEACTIVATE)
 
