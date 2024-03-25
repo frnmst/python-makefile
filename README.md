@@ -58,7 +58,7 @@ In this example we are setting up the
 The name of the project is `md-toc` (with hyphen) but the Python module is
 called `md_toc` (underscore). That's why there are two variables.
 
-First of all add `Makefile` to your gitignore
+First of all, add `Makefile` to your gitignore
 
 ```shell
 echo 'Makefile' >> .gitignore
@@ -70,20 +70,21 @@ Then download the Makefile in your project
 make -f .project.mk bootstrap
 ```
 
-Now you can run your operations, for example
+Now you can run the operations, for example
 
 ```shell
 make install-dev
 make test
 ```
 
-You can also create new targets in `.project.mk` and run them
+You can also create new targets in [`.project.mk`](./.project.mk.example) and
+run them
 
 ```shell
 make example-target
 ```
 
-Overriding is simple. Just add your overriden target and the override variable
+Overriding is simple: just add your overridden target and the override variable
 in the `.project.mk` file.
 
 ## License
