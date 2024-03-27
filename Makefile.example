@@ -82,7 +82,8 @@ check-requirements:
 		--dry-run; \
 		$(VENV_DEACTIVATE)
 
-install-dev:
+install-dev::
+ifeq ($(OVERRIDE_INSTALL_DEV),)
 	$(VENV_NEW)
 	$(VENV_ACTIVATE) \
 		&& { python3 -c 'import pip; import sys; sys.exit(0) if int(pip.__version__.split(".")[0]) >= 23 else sys.exit(1)' \
@@ -102,13 +103,15 @@ install-dev:
 	$(VENV_ACTIVATE) \
 		&& pre-commit install --hook-type commit-msg; \
 		$(VENV_DEACTIVATE)
+endif
 
 # Add hashes to the freeze file be re-downloading the packages locally and
 # generating their hashes locally.
 # Generate both SHA512 and SHA256 hashes, then "mix" them together in the
 # same output file along with package names and versions.
 # Assume that each package has one corresponding file only.
-regenerate-freeze: regenerate-freeze-no-hashes
+regenerate-freeze:: regenerate-freeze-no-hashes
+ifeq ($(OVERRIDE_REGENERATE_FREEZE),)
 	$(VENV_NEW)
 	$(VENV_ACTIVATE) \
 		&& mkdir .pip-hashes \
@@ -129,16 +132,22 @@ regenerate-freeze: regenerate-freeze-no-hashes
 		&& sed -i "1i# Frozen with: $(ARCH)~$(PYTHON_VERSION)~$(PIP_VERSION)" .requirements-freeze-hashes.txt \
 		&& rm -rf .pip-hashes; \
 		$(VENV_DEACTIVATE)
+endif
 
-regenerate-freeze-no-hashes: uninstall-dev
+
+regenerate-freeze-no-hashes:: uninstall-dev
+ifeq ($(OVERRIDE_REGENERATE_FREEZE_NO_HASHES),)
 	$(VENV_NEW)
 	$(VENV_ACTIVATE) \
 		&& pip install --require-virtualenv --disable-pip-version-check --requirement requirements.txt --requirement requirements-dev.txt \
 		&& pip freeze --require-virtualenv --disable-pip-version-check --local > requirements-freeze.txt; \
 		$(VENV_DEACTIVATE)
+endif
 
-uninstall-dev:
+uninstall-dev::
+ifeq ($(OVERRIDE_UNINSTALL_DEV),)
 	rm -rf .venv .pip-hashes
+endif
 
 update:: install-dev
 ifeq ($(OVERRIDE_UPDATE),)

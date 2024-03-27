@@ -33,16 +33,16 @@ Python projects.
 | `make datadog` | Check all Python dependencies for suspicious data. Requires Docker. | ✘ | |
 | `make fuzzer` | Run a fuzzer. Must be `${PYTHON_MODULE_NAME}/tests/fuzzer.py` | ✘ | |
 | `make install` | Install the package in the user home | ✓ | `OVERRIDE_INSTALL` |
-| `make install-dev` | Install the development environment | ✘ | |
+| `make install-dev` | Install the development environment | ✓ | `OVERRIDE_INSTALL_DEV` |
 | `make pre-commit` | Run all pre-commit hooks | ✘ | |
-| `make regenerate-freeze` | Same as `make regenerate-freeze-no-hashes` and adds checksum to the pinned requirements files | ✘ | |
-| `make regenerate-freeze-no-hashes` | Just do a `pip freeze` on the development environment | ✘ | |
+| `make regenerate-freeze` | Same as `make regenerate-freeze-no-hashes` and adds checksum to the pinned requirements files | ✓ | `OVERRIDE_REGENERATE_FREEZE` |
+| `make regenerate-freeze-no-hashes` | Just do a `pip freeze` on the development environment | ✓ | `OVERRIDE_REGENERATE_FREEZE` |
 | `make test` | Run unit tests for all Python versions defined in `./setup.cfg`. Must be in `${PYTHON_MODULE_NAME}/tests/tests.py` | ✘ | |
 | `make test-single` | Run unit tests for the default Python version. Must be in `${PYTHON_MODULE_NAME}/tests/tests.py` | ✘ | |
 | `make update` | Update pre-commit hooks | ✓ | `OVERRIDE_UPDATE` |
 | `make upload` | Upload the distribution files generated with `make dist` to PyPI | ✘ | |
 | `make uninstall` | Remove the package from the user home | ✓ | `OVERRIDE_UNINSTALL` |
-| `make uninstall-dev` | Remove the development environment | ✘ | |
+| `make uninstall-dev` | Remove the development environment | ✓ | `OVERRIDE_UNINSTALL_DEV` |
 
 ## Example
 
