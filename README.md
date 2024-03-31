@@ -46,6 +46,12 @@ Python projects.
 
 ## Example
 
+First of all install [curl](https://curl.se/). On Debian-based systems:
+
+```shell
+apt install curl
+```
+
 Create a [`.project.mk`](./.project.mk.example) file in your repository
 
 ```shell
@@ -56,15 +62,15 @@ In this example we are setting up the
 [md-toc](https://software.franco.net.eu.org/frnmst/md-toc) project.
 
 The name of the project is `md-toc` (with hyphen) but the Python module is
-called `md_toc` (underscore). That's why there are two variables.
+called `md_toc` (underscore). That is why there are two variables.
 
-First of all, add `Makefile` to your gitignore
+Add `Makefile` to your gitignore
 
 ```shell
 echo 'Makefile' >> .gitignore
 ```
 
-Then download the Makefile in your project
+Download the Makefile in your project
 
 ```
 make -f .project.mk bootstrap
@@ -85,7 +91,7 @@ make example-target
 ```
 
 Overriding is simple: just add your overridden target and the override variable
-in the `.project.mk` file.
+in the [`.project.mk`](./.project.mk.example) file.
 
 ## License
 
