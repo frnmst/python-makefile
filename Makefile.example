@@ -218,7 +218,7 @@ dist:
 	# https://reproducible-builds.org/docs/source-date-epoch/
 	docker build \
 		--tag 'python-reproducible-build' \
-		--file .dockerfile_build_dist \
+		--file .dockerfile_build_python_dist \
 		. \
 	&& docker run -v $$(pwd):/app 'python-reproducible-build'
 
