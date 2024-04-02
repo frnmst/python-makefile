@@ -12,7 +12,7 @@ MAKEFILE_SOURCE := https://software.franco.net.eu.org/frnmst/python-makefile/raw
 DOCKER_BUILD_DIST_SOURCE := https://software.franco.net.eu.org/frnmst/python-makefile/raw/branch/master/.dockerfile_build_dist.example
 bootstrap:
 	curl -o Makefile $(MAKEFILE_SOURCE)
-    curl -o .dockerfile_build_dist $(DOCKER_BUILD_DIST_SOURCE)
+	curl -o .dockerfile_build_dist $(DOCKER_BUILD_DIST_SOURCE)
 
 # Add extra targets here. Optional.
 example-target:
