@@ -5,6 +5,7 @@
 !SECURITY.md
 Makefile
 .requirements-freeze-hashes.txt
+.dockerfile_build_python_dist
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
