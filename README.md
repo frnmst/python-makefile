@@ -64,10 +64,11 @@ In this example we are setting up the
 The name of the project is `md-toc` (with hyphen) but the Python module is
 called `md_toc` (underscore). That is why there are two variables.
 
-Add `Makefile` to your gitignore
+Add `Makefile` and `.dockerfile_build_python_dist` to your gitignore
 
 ```shell
 echo 'Makefile' >> .gitignore
+echo '.dockerfile_build_python_dist' >> .gitignore
 ```
 
 Download the Makefile in your project
