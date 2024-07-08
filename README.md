@@ -77,6 +77,13 @@ Download the Makefile in your project
 make -f .project.mk bootstrap
 ```
 
+If you are bootstrapping a project from scratch (i.e.: a new project),
+regenerate the requirements freeze file
+
+```shell
+make regenerate-freeze
+```
+
 Now you can run the operations, for example
 
 ```shell
