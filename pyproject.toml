@@ -4,3 +4,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.bandit]
 skips=["B404", "B506", "B410", "B603", "B324"]
+
+[tool.commitizen]
+name = "cz_gitmoji"

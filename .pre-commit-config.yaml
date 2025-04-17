@@ -70,7 +70,7 @@ repos:
   rev: 'v2.7.2'
   hooks:
     - id: pip-audit
-      args: ['--requirement', '.requirements-freeze-hashes.txt', '--local', '--require-hashes', '--desc', '--aliases', '--no-deps', '--disable-pip', '--strict']
+      args: ['--requirement', '.requirements-freeze-hashes.txt', '--local', '--require-hashes', '--desc', '--aliases', '--disable-pip', '--strict']
 
 - repo: https://github.com/mgedmin/check-manifest
   rev: '0.49'
@@ -81,3 +81,8 @@ repos:
   rev: 'v0.19.1'
   hooks:
     - id: gitlint
+
+- repo: https://github.com/ljnsn/cz-conventional-gitmoji
+  rev: 'v0.7.0'
+  hooks:
+    - id: conventional-gitmoji

@@ -55,11 +55,11 @@ apt install curl
 Create a [`.project.mk`](./.project.mk.example) file in your repository
 
 ```shell
-curl -o .project.mk https://software.franco.net.eu.org/frnmst/python-makefile/raw/branch/master/.project.mk.example
+curl -o .project.mk https://codeberg.org/frnmst/python-makefile/raw/branch/master/.project.mk.example
 ```
 
 In this example we are setting up the
-[md-toc](https://software.franco.net.eu.org/frnmst/md-toc) project.
+[md-toc](https://codeberg.org/frnmst/md-toc) project.
 
 The name of the project is `md-toc` (with hyphen) but the Python module is
 called `md_toc` (underscore). That is why there are two variables.
@@ -105,7 +105,7 @@ in the [`.project.mk`](./.project.mk.example) file.
 
 MIT License
 
-Copyright (C) 2024 Franco Masotti (see /README.md)
+Copyright (C) 2024-2025 Franco Masotti (see /README.md)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
