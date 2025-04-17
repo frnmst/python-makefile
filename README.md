@@ -130,7 +130,7 @@ SOFTWARE.
 You can check the authenticity of new releases using my public key.
 
 Changelogs, instructions, sources and keys can be found at
-[blog.franco.net.eu.org/software/#md-toc](https://blog.franco.net.eu.org/software/#md-toc).
+[blog.franco.net.eu.org/software/#python-makefile](https://blog.franco.net.eu.org/software/#python-makefile).
 
 ## Support this project
 
