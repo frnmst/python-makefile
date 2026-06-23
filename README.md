@@ -1,6 +1,21 @@
 # python-makefile
 
-A Makefile to be used for automating Python development operations
+A Makefile to be used for automating Python development operations.
+
+<!--TOC-->
+
+- [python-makefile](#python-makefile)
+  - [Description](#description)
+  - [Why not uv, Poetry, Pipenv, etc](#why-not-uv-poetry-pipenv-etc)
+  - [Features](#features)
+  - [Built-in commands](#built-in-commands)
+  - [Workflow](#workflow)
+  - [Extra Makefile targets](#extra-makefile-targets)
+  - [License](#license)
+  - [Changelog and trusted source](#changelog-and-trusted-source)
+  - [Support this project](#support-this-project)
+
+<!--TOC-->
 
 ## Description
 
@@ -9,14 +24,29 @@ everything. In this case, instead of writing complex commands by hand or using
 a shell script, I use a Makefile to run operations I use frequently in my
 Python projects.
 
+## Why not uv, Poetry, Pipenv, etc
+
+Those are non standard built-in tools:
+
+- uv is now owned by OpenAI so it's dangerous in terms of vendor lock-in and
+  rug-pulls
+- Pipenv had [huge problems during the lock file phase](https://github.com/pypa/pipenv/issues?q=is%3Aissue%20lock%20failed); that was the first reason I stopped using it
+- Poetry is complex, as stated in their readme
+  > Poetry is a large, complex project always in need of contributors
+
+Once
+[pylock.toml](https://packaging.python.org/en/latest/specifications/pylock-toml/)
+goes mainstream, this Makefile will be even simpler, possibily only requiring
+built-in Python tools.
+
 ## Features
 
 - setup development environment using venv
-- freeze requirements with hashes
+- lock requirements with hashes
 - install and uninstall locally
 - run tests, benchmarks, fuzzer and demo
 - upload to PyPI
-- build Sphinx documentation
+- build documentation
 - run pre-commit
 - cleanup
 
@@ -25,71 +55,69 @@ Python projects.
 | Command | Description | Can override | Makefile override variable |
 |---------|-------------|--------------|----------------------------|
 | `make benchmark` | Run some benchmarks. Must be `${PYTHON_MODULE_NAME}/tests/benchmark.py` | ✘ |
-| `make check-requirements` | Compare `requirements-freeze.txt` checksums to PyPI packages | ✘ | |
 | `make clean` | Clean temporary files | ✓ | `OVERRIDE_CLEAN` |
 | `make doc` | Build the documentation with sphinx | ✓ | `OVERRIDE_DOC` |
 | `make demo` | Run a CLI demo to show how the project works. Uses asciinema | ✘ | |
 | `make dist` | Create wheel and source distributions ready for PyPI | ✘ | |
-| `make datadog` | Check all Python dependencies for suspicious data. Requires Docker. | ✘ | |
 | `make fuzzer` | Run a fuzzer. Must be `${PYTHON_MODULE_NAME}/tests/fuzzer.py` | ✘ | |
-| `make install` | Install the package in the user home | ✓ | `OVERRIDE_INSTALL` |
 | `make install-dev` | Install the development environment | ✓ | `OVERRIDE_INSTALL_DEV` |
 | `make pre-commit` | Run all pre-commit hooks | ✘ | |
-| `make regenerate-freeze` | Same as `make regenerate-freeze-no-hashes` and adds checksum to the pinned requirements files | ✓ | `OVERRIDE_REGENERATE_FREEZE` |
-| `make regenerate-freeze-no-hashes` | Just do a `pip freeze` on the development environment | ✓ | `OVERRIDE_REGENERATE_FREEZE` |
+| `make pre-commit-update` | Update pre-commit hooks | ✓ | `OVERRIDE_UPDATE` |
+| `make regenerate-lock` | Same as `make regenerate-freeze-no-hashes` and adds checksum to the pinned requirements files | ✓ | `OVERRIDE_REGENERATE_FREEZE` |
 | `make test` | Run unit tests for all Python versions defined in `./setup.cfg`. Must be in `${PYTHON_MODULE_NAME}/tests/tests.py` | ✘ | |
 | `make test-single` | Run unit tests for the default Python version. Must be in `${PYTHON_MODULE_NAME}/tests/tests.py` | ✘ | |
-| `make update` | Update pre-commit hooks | ✓ | `OVERRIDE_UPDATE` |
 | `make upload` | Upload the distribution files generated with `make dist` to PyPI | ✘ | |
-| `make uninstall` | Remove the package from the user home | ✓ | `OVERRIDE_UNINSTALL` |
 | `make uninstall-dev` | Remove the development environment | ✓ | `OVERRIDE_UNINSTALL_DEV` |
 
-## Example
+## Workflow
 
-First of all install [curl](https://curl.se/). On Debian-based systems:
+1. install [curl](https://curl.se/). On Debian-based systems:
 
-```shell
-apt install curl
-```
+   ```shell
+   apt install curl
+   ```
 
-Create a [`.project.mk`](./.project.mk.example) file in your repository
+2. create a [`.project.mk`](./.project.linux.mk.example) file in your repository
 
-```shell
-curl -o .project.mk https://codeberg.org/frnmst/python-makefile/raw/branch/master/.project.mk.example
-```
+   ```shell
+   curl -o .project.mk https://codeberg.org/frnmst/python-makefile/raw/branch/master/.project.linux.mk.example
+   ```
 
-In this example we are setting up the
-[md-toc](https://codeberg.org/frnmst/md-toc) project.
+   In this example we are setting up the
+   [md-toc](https://codeberg.org/frnmst/md-toc) project.
 
-The name of the project is `md-toc` (with hyphen) but the Python module is
-called `md_toc` (underscore). That is why there are two variables.
+   The name of the project is `md-toc` (with hyphen) but the Python module is
+   called `md_toc` (underscore). That is why there are two variables.
 
-Add `Makefile` and `.dockerfile_build_python_dist` to your gitignore
+3. add `Makefile` and `.dockerfile_build_python_dist` to your gitignore
 
-```shell
-echo 'Makefile' >> .gitignore
-echo '.dockerfile_build_python_dist' >> .gitignore
-```
+   ```shell
+   echo 'Makefile' >> .gitignore
+   echo '.dockerfile_build_python_dist' >> .gitignore
+   ```
 
-Download the Makefile in your project
+4. download the Makefile in your project. This will pull new updates from this
+   repository if there have been changes in the Makefile.
 
-```
-make -f .project.mk bootstrap
-```
+   ```shell
+   make -f .project.mk bootstrap
+   ```
 
-If you are bootstrapping a project from scratch (i.e.: a new project),
-regenerate the requirements freeze file
+5. If you are bootstrapping a project from scratch (i.e.: a new project),
+   regenerate the requirements freeze file:
 
-```shell
-make regenerate-freeze
-```
+   ```shell
+   make regenerate-lock
+   ```
 
-Now you can run the operations, for example
+6. install the development environment. your project must have a
+   `pyproject.toml` file
 
-```shell
-make install-dev
-make test
-```
+   ```shell
+   make install-dev
+   ```
+
+## Extra Makefile targets
 
 You can also create new targets in [`.project.mk`](./.project.mk.example) and
 run them
@@ -99,13 +127,13 @@ make example-target
 ```
 
 Overriding is simple: just add your overridden target and the override variable
-in the [`.project.mk`](./.project.mk.example) file.
+in the [`.project.mk`](./.project.linux.mk.example) file.
 
 ## License
 
 MIT License
 
-Copyright (C) 2024-2025 Franco Masotti (see /README.md)
+Copyright (C) 2024-2026 Franco Masotti (see /README.md)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

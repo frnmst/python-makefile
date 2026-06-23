@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: 'v4.6.0'
+  rev: 'v6.0.0'
   hooks:
     - id: trailing-whitespace
     - id: end-of-file-fixer
@@ -13,11 +13,6 @@ repos:
     - id: check-ast
     - id: check-case-conflict
     - id: debug-statements
-    # Add <# -*- coding: utf-8 -*-> to the top of python files.
-    - id: fix-encoding-pragma
-        # https://github.com/asottile/pyupgrade/issues/748
-        # https://github.com/asottile/pyupgrade/issues/89
-      args: ['--remove']
     - id: forbid-submodules
     - id: check-symlinks
     - id: check-shebang-scripts-are-executable
@@ -31,27 +26,27 @@ repos:
     - id: requirements-txt-fixer
 
 # YAPF and flake8 need to remain pinned.
-- repo: https://github.com/pre-commit/mirrors-yapf
-  rev: 'v0.32.0' # frozen: v0.32.0
+- repo: https://github.com/google/yapf
+  rev: 'v0.43.0' # frozen 'v0.43.0'
   hooks:
     - id: yapf
       additional_dependencies: ['toml']
 
 - repo: https://github.com/pycqa/flake8
-  rev: '6.0.0' # frozen: 6.0.0
+  rev: '7.3.0' # frozen '7.3.0'
   hooks:
     - id: flake8
       additional_dependencies: ['flake8-docstrings']
 
 - repo: https://github.com/PyCQA/bandit
-  rev: '1.7.8'
+  rev: '1.9.4'
   hooks:
     - id: bandit
       args: ['-c', 'pyproject.toml', '--level', 'LOW']
       additional_dependencies: ['bandit[toml]']
 
 - repo: https://github.com/pycqa/isort
-  rev: '5.13.2'
+  rev: '9.0.0a3'
   hooks:
     - id: isort
 
@@ -66,14 +61,8 @@ repos:
     - id: md-toc
       args: ['-p', 'cmark', '-l6']
 
-- repo: https://github.com/pypa/pip-audit
-  rev: 'v2.7.2'
-  hooks:
-    - id: pip-audit
-      args: ['--requirement', '.requirements-freeze-hashes.txt', '--local', '--require-hashes', '--desc', '--aliases', '--disable-pip', '--strict']
-
 - repo: https://github.com/mgedmin/check-manifest
-  rev: '0.49'
+  rev: '0.51'
   hooks:
     - id: check-manifest
 

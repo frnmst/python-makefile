@@ -3,7 +3,7 @@
 #
 # MIT License
 #
-# Copyright (C) 2024 Franco Masotti (see /README.md)
+# Copyright (C) 2024-2026 Franco Masotti (see /README.md)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,7 @@ PIP_VERSION := $$(pip --version | awk '{print $$1,$$2}')
 VENV_NEW := python3 -m venv .venv
 VENV_ACTIVATE := . .venv/bin/activate
 VENV_DEACTIVATE := deactivate
+LOCK_FILENAME := $$(uname -s | tr '[:upper:]' '[:lower:]')-py$$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')-requirements.lock
 
 include .project.mk
 
@@ -51,51 +52,22 @@ else
 endif
 endif
 
-install::
-ifeq ($(OVERRIDE_INSTALL),)
-	# pip 23 introduced the '--break-system-packages' option.
-	python3 -c 'import pip; import sys; sys.exit(0) if int(pip.__version__.split(".")[0]) >= 23 else sys.exit(1)' \
-		&& pip3 install --break-system-packages --disable-pip-version-check  . --user \
-		|| pip3 install --disable-pip-version-check  . --user
-endif
-
-uninstall::
-ifeq ($(OVERRIDE_UNINSTALL),)
-	# pip 23 introduced the '--break-system-packages' option.
-	python3 -c 'import pip; import sys; sys.exit(0) if int(pip.__version__.split(".")[0]) >= 23 else sys.exit(1)' \
-		&& pip3 uninstall --break-system-packages --disable-pip-version-check --verbose --yes $(PYTHON_MODULE_NAME) \
-		|| pip3 uninstall --disable-pip-version-check --verbose --yes $(PYTHON_MODULE_NAME)
-endif
-
-# Check if the remote requirements have the same hashes as the local ones.
-# This signals if at least one remote dependency has been tampered with since
-# the last pip freeze operation.
-check-requirements:
-	$(VENV_ACTIVATE) \
-		&& pip install \
-		--require-virtualenv \
-		--requirement .requirements-freeze-hashes.txt \
-		--require-hashes \
-		--no-deps \
-		--no-cache-dir \
-		--target .fake-env \
-		--dry-run; \
-		$(VENV_DEACTIVATE)
-
+# pip-audit and pip-tools must always be in the dev dependencies.
 install-dev::
 ifeq ($(OVERRIDE_INSTALL_DEV),)
-	$(VENV_NEW)
-	$(VENV_ACTIVATE) \
-		&& { python3 -c 'import pip; import sys; sys.exit(0) if int(pip.__version__.split(".")[0]) >= 23 else sys.exit(1)' \
+	$(VENV_NEW) \
+		&& $(VENV_ACTIVATE) \
 		&& pip install \
-		--disable-pip-version-check \
-		--require-virtualenv \
-		--requirement requirements-freeze.txt \
-		--no-deps \
-		|| pip install \
-		--require-virtualenv \
-		--requirement requirements-freeze.txt \
-		--no-deps ; }; \
+			--require-hashes \
+			--require-venv \
+			--requirement=$(LOCK_FILENAME) \
+		&& pip-audit \
+			--strict \
+			--requirement $(LOCK_FILENAME) \
+		&& pip install \
+			--require-venv \
+			--no-deps \
+			-e .; \
 		$(VENV_DEACTIVATE)
 	$(VENV_ACTIVATE) \
 		&& pre-commit install; \
@@ -105,58 +77,36 @@ ifeq ($(OVERRIDE_INSTALL_DEV),)
 		$(VENV_DEACTIVATE)
 endif
 
-# Add hashes to the freeze file be re-downloading the packages locally and
-# generating their hashes locally.
-# Generate both SHA512 and SHA256 hashes, then "mix" them together in the
-# same output file along with package names and versions.
-# Assume that each package has one corresponding file only.
-regenerate-freeze:: regenerate-freeze-no-hashes
-ifeq ($(OVERRIDE_REGENERATE_FREEZE),)
-	$(VENV_NEW)
-	$(VENV_ACTIVATE) \
-		&& mkdir .pip-hashes \
-		&& cd .pip-hashes \
-		&& pip download --require-virtualenv --disable-pip-version-check --requirement ../requirements-freeze.txt \
-		&& find . \
-		-type f \
-		-regex "\(.*\.whl\|.*\.tar\.gz\)" \
-		-not -name "setuptools*" \
-		-exec pip hash --algorithm sha512 --no-color {} \; \
-		-exec pip hash --algorithm sha256 --no-color {} \; \
-		| sed -n 'n;p' > raw_hashes.txt \
-		&& cat raw_hashes.txt \
-		| paste -sd '?\n' > tmp.hashes \
-		&& paste -d '| ' ../requirements-freeze.txt tmp.hashes | sed 's/|/ \\\n    /g' | sed 's/?/ \\\n    /g' > req.freeze \
-		&& cd .. \
-		&& mv .pip-hashes/req.freeze .requirements-freeze-hashes.txt \
-		&& sed -i "1i# Frozen with: $(ARCH)~$(PYTHON_VERSION)~$(PIP_VERSION)" .requirements-freeze-hashes.txt \
-		&& rm -rf .pip-hashes; \
+regenerate-lock::
+ifeq ($(OVERRIDE_REGENERATE_LOCK),)
+	$(VENV_NEW) \
+		&& $(VENV_ACTIVATE) \
+		&& pip install -e .[dev] \
+		&& pip-compile \
+			--extra=dev \
+			--generate-hashes \
+			--strip-extras \
+			--allow-unsafe pyproject.toml \
+		    --output-file=$(LOCK_FILENAME) \
+		&& pip-audit \
+			--strict \
+			--requirement $(LOCK_FILENAME); \
 		$(VENV_DEACTIVATE)
 endif
 
-
-regenerate-freeze-no-hashes:: uninstall-dev
-ifeq ($(OVERRIDE_REGENERATE_FREEZE_NO_HASHES),)
-	$(VENV_NEW)
-	$(VENV_ACTIVATE) \
-		&& pip install --require-virtualenv --disable-pip-version-check --requirement requirements.txt --requirement requirements-dev.txt \
-		&& pip freeze --require-virtualenv --disable-pip-version-check --local > requirements-freeze.txt; \
-		$(VENV_DEACTIVATE)
-endif
 
 uninstall-dev::
 ifeq ($(OVERRIDE_UNINSTALL_DEV),)
-	rm -rf .venv .pip-hashes
+	rm -rf .venv
 endif
 
-update:: install-dev
+pre-commit-update:: install-dev
 ifeq ($(OVERRIDE_UPDATE),)
 	$(VENV_ACTIVATE) \
 		&& pre-commit autoupdate \
 			--repo https://github.com/pre-commit/pre-commit-hooks \
 			--repo https://github.com/PyCQA/bandit \
 			--repo https://github.com/pycqa/isort \
-			--repo https://codeberg.org/frnmst/licheck \
 			--repo https://codeberg.org/frnmst/md-toc \
 			--repo https://github.com/mgedmin/check-manifest \
 			--repo https://github.com/jorisroovers/gitlint; \
@@ -266,12 +216,4 @@ else
 		$(VENV_DEACTIVATE)
 endif
 
-datadog:
-ifeq ($(wildcard /usr/bin/docker),)
-	@echo 'error: docker not installed'
-	@exit 1
-else
-	docker run --rm -v $$(pwd):/src/ ghcr.io/datadog/guarddog pypi verify /src/requirements-freeze.txt
-endif
-
-.PHONY: default doc install uninstall install-dev uninstall-dev update test clean demo benchmark pre-commit regenerate-freeze regenerate-freeze-no-hashes datadog dist
+.PHONY: default doc install-dev uninstall-dev update test clean demo benchmark pre-commit regenerate-lock dist
