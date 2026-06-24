@@ -9,10 +9,11 @@ PYTHON_MODULE_NAME := python_makefile
 
 # Required.
 MAKEFILE_SOURCE := https://repos.franco.net.eu.org/frnmst/python-makefile/raw/branch/master/Makefile.linux.example
-DOCKER_BUILD_PYTHON_DIST_SOURCE := https://repos.franco.net.eu.org/frnmst/python-makefile/raw/branch/master/.dockerfile_build_python_dist.example
+DOCKER_BUILD_PYTHON_DIST_SOURCE := https://repos.franco.net.eu.org/frnmst/python-makefile/raw/branch/master/Dockerfile.python3.13_hatchling.build.example
+
 bootstrap:
 	curl -o Makefile $(MAKEFILE_SOURCE)
-	curl -o .dockerfile_build_python_dist $(DOCKER_BUILD_PYTHON_DIST_SOURCE)
+	curl -o Dockerfile.python3.13_hatchling.build $(DOCKER_BUILD_PYTHON_DIST_SOURCE)
 
 # Add extra targets here. Optional.
 example-target:

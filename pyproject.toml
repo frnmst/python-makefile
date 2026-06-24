@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools >= 77.0.3"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling >= 1.30"]
+build-backend = "hatchling.build"
 
 [project]
 name = "python-makefile"
@@ -9,6 +9,7 @@ authors = [
     { name = "Franco Masotti" },
 ]
 description = "Python Makefile"
+readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "pre-commit>=4,<5",
@@ -16,14 +17,23 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pip-tools", # Development-only dependency management.
+    "pip-tools",
     "pip-audit",
     "build",
+    "twine",
+    "hatchling",
 ]
 
-[tool.setuptools.packages.find]
+# Non-Python package repositories: do not include anything in the package.
+[tool.hatch.build]
 include = []
-exclude = ["*"]
+
+[tool.hatch.build.targets.sdist]
+reproducible = true
+
+[tool.hatch.build.targets.wheel]
+bypass-selection = true
+reproducible = true
 
 [tool.bandit]
 skips=["B404", "B506", "B410", "B603", "B324"]

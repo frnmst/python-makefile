@@ -1,0 +1,11 @@
+# Exclude all files.
+*
+
+!pyproject.toml
+!README.md
+!linux-py3.13-requirements.lock
+!linux-py3.13-requirements-dev.lock
+
+# Include source files if needed (e.g. real Python package).
+#!src/
+#!config/

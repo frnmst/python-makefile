@@ -6,11 +6,12 @@ A Makefile to be used for automating Python development operations.
 
 - [python-makefile](#python-makefile)
   - [Description](#description)
-  - [Why not uv, Poetry, Pipenv, etc](#why-not-uv-poetry-pipenv-etc)
+  - [Why not uv, Poetry, Pipenv, etc...](#why-not-uv-poetry-pipenv-etc)
   - [Features](#features)
   - [Built-in commands](#built-in-commands)
   - [Workflow](#workflow)
   - [Extra Makefile targets](#extra-makefile-targets)
+  - [Reproducible builds](#reproducible-builds)
   - [License](#license)
   - [Changelog and trusted source](#changelog-and-trusted-source)
   - [Support this project](#support-this-project)
@@ -24,30 +25,36 @@ everything. In this case, instead of writing complex commands by hand or using
 a shell script, I use a Makefile to run operations I use frequently in my
 Python projects.
 
-## Why not uv, Poetry, Pipenv, etc
+## Why not uv, Poetry, Pipenv, etc...
 
 Those are non standard built-in tools:
 
 - uv is now owned by OpenAI so it's dangerous in terms of vendor lock-in and
   rug-pulls
 - Pipenv had [huge problems during the lock file phase](https://github.com/pypa/pipenv/issues?q=is%3Aissue%20lock%20failed); that was the first reason I stopped using it
-- Poetry is complex, as stated in their readme
+- Poetry is complex, as stated in
+  [their readme](https://github.com/python-poetry/poetry#contribute)
   > Poetry is a large, complex project always in need of contributors
 
 Once
 [pylock.toml](https://packaging.python.org/en/latest/specifications/pylock-toml/)
 goes mainstream, this Makefile will be even simpler, possibily only requiring
-built-in Python tools.
+built-in Python tools except from
+[pip-audit](https://pypi.org/project/pip-audit/).
+
+> [!NOTE]
+> [hatch uses uv](https://github.com/pypa/hatch/blob/hatchling-v1.30.1/pyproject.toml#L58)
+> so [build](https://pypi.org/project/build/) is the preferred build tool
+> instead.
 
 ## Features
 
-- setup development environment using venv
+- setup and remove a development environment using venv
 - lock requirements with hashes
-- install and uninstall locally
 - run tests, benchmarks, fuzzer and demo
 - upload to PyPI
 - build documentation
-- run pre-commit
+- setup, update and run pre-commit hooks
 - cleanup
 
 ## Built-in commands
@@ -58,7 +65,7 @@ built-in Python tools.
 | `make clean` | Clean temporary files | ✓ | `OVERRIDE_CLEAN` |
 | `make doc` | Build the documentation with sphinx | ✓ | `OVERRIDE_DOC` |
 | `make demo` | Run a CLI demo to show how the project works. Uses asciinema | ✘ | |
-| `make dist` | Create wheel and source distributions ready for PyPI | ✘ | |
+| `make dist` | Create reproducible wheel and source distributions ready for PyPI, as well as their checksums | ✘ | |
 | `make fuzzer` | Run a fuzzer. Must be `${PYTHON_MODULE_NAME}/tests/fuzzer.py` | ✘ | |
 | `make install-dev` | Install the development environment | ✓ | `OVERRIDE_INSTALL_DEV` |
 | `make pre-commit` | Run all pre-commit hooks | ✘ | |
@@ -128,6 +135,16 @@ make example-target
 
 Overriding is simple: just add your overridden target and the override variable
 in the [`.project.mk`](./.project.linux.mk.example) file.
+
+## Reproducible builds
+
+To deterministically build your Python project inside a Docker container, run:
+
+```shell
+make dist
+```
+
+This also generates checksums for the wheel and source distributions.
 
 ## License
 

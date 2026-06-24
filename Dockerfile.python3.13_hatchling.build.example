@@ -1,0 +1,31 @@
+FROM python:3.13.14-slim-trixie@sha256:2b7445fb71ca9cb15e9aab053fe8cb3162796f8e1d92ada12a49c766a811bc1e AS builder
+
+ENV SOURCE_DATE_EPOCH=1700000000
+ENV PYTHONHASHSEED=0
+ENV LC_ALL=C.UTF-8
+
+WORKDIR /build
+
+COPY linux-py3.13-requirements.lock ./prod-constraints.txt
+COPY linux-py3.13-requirements-dev.lock ./dev-constraints.txt
+
+ENV PIP_CONSTRAINT=/build/dev-constraints.txt
+RUN pip install --no-cache-dir build twine hatchling
+
+# Copy source code.
+COPY . .
+
+ENV PIP_CONSTRAINT=/build/prod-constraints.txt
+ENV PIP_NO_BUILD_ISOLATION=1
+RUN python -m build --wheel --sdist --no-isolation
+
+RUN twine check --strict dist/* && \
+    cd dist && \
+        for file in *; do \
+            sha256sum "$file" > "$file".SHA256SUM.txt && \
+            md5sum "$file" > "$file".MD5SUM.txt; \
+        done
+
+# Empty clean docker image.
+FROM scratch
+COPY --from=builder /build/dist /

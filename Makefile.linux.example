@@ -32,6 +32,7 @@ PIP_VERSION := $$(pip --version | awk '{print $$1,$$2}')
 VENV_NEW := python3 -m venv .venv
 VENV_ACTIVATE := . .venv/bin/activate
 VENV_DEACTIVATE := deactivate
+LOCK_DEV_FILENAME := $$(uname -s | tr '[:upper:]' '[:lower:]')-py$$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')-requirements-dev.lock
 LOCK_FILENAME := $$(uname -s | tr '[:upper:]' '[:lower:]')-py$$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')-requirements.lock
 
 include .project.mk
@@ -60,10 +61,10 @@ ifeq ($(OVERRIDE_INSTALL_DEV),)
 		&& pip install \
 			--require-hashes \
 			--require-venv \
-			--requirement=$(LOCK_FILENAME) \
+			--requirement=$(LOCK_DEV_FILENAME) \
 		&& pip-audit \
 			--strict \
-			--requirement $(LOCK_FILENAME) \
+			--requirement $(LOCK_DEV_FILENAME) \
 		&& pip install \
 			--require-venv \
 			--no-deps \
@@ -83,7 +84,6 @@ ifeq ($(OVERRIDE_REGENERATE_LOCK),)
 		&& $(VENV_ACTIVATE) \
 		&& pip install -e .[dev] \
 		&& pip-compile \
-			--extra=dev \
 			--generate-hashes \
 			--strip-extras \
 			--allow-unsafe pyproject.toml \
@@ -91,6 +91,23 @@ ifeq ($(OVERRIDE_REGENERATE_LOCK),)
 		&& pip-audit \
 			--strict \
 			--requirement $(LOCK_FILENAME); \
+		$(VENV_DEACTIVATE)
+endif
+
+regenerate-dev-lock::
+ifeq ($(OVERRIDE_REGENERATE_DEV_LOCK),)
+	$(VENV_NEW) \
+		&& $(VENV_ACTIVATE) \
+		&& pip install -e .[dev] \
+		&& pip-compile \
+			--extra=dev \
+			--generate-hashes \
+			--strip-extras \
+			--allow-unsafe pyproject.toml \
+		    --output-file=$(LOCK_DEV_FILENAME) \
+		&& pip-audit \
+			--strict \
+			--requirement $(LOCK_DEV_FILENAME); \
 		$(VENV_DEACTIVATE)
 endif
 
@@ -178,10 +195,9 @@ dist:
 	# https://github.com/pypa/setuptools/issues/2133
 	# https://reproducible-builds.org/docs/source-date-epoch/
 	docker build \
-		--tag 'python-reproducible-build' \
-		--file .dockerfile_build_python_dist \
-		. \
-	&& docker run -v $$(pwd):/app 'python-reproducible-build'
+		--no-cache \
+		-f Dockerfile.python3.13_hatchling.build \
+		--output ./dist .
 
 upload:
 	$(VENV_ACTIVATE) \
@@ -216,4 +232,4 @@ else
 		$(VENV_DEACTIVATE)
 endif
 
-.PHONY: default doc install-dev uninstall-dev update test clean demo benchmark pre-commit regenerate-lock dist
+.PHONY: default doc install-dev uninstall-dev update test clean demo benchmark pre-commit regenerate-lock regenerate-dev-lock dist

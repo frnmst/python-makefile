@@ -1,11 +1,10 @@
+Dockerfile.python3.13_hatchling.build
 *.md
 *.MD
 !README.md
 !CONTRIBUTING.md
 !SECURITY.md
 Makefile
-.requirements-freeze-hashes.txt
-.dockerfile_build_python_dist
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
