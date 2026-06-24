@@ -70,7 +70,8 @@ built-in Python tools except from
 | `make install-dev` | Install the development environment | ✓ | `OVERRIDE_INSTALL_DEV` |
 | `make pre-commit` | Run all pre-commit hooks | ✘ | |
 | `make pre-commit-update` | Update pre-commit hooks | ✓ | `OVERRIDE_UPDATE` |
-| `make regenerate-lock` | Same as `make regenerate-freeze-no-hashes` and adds checksum to the pinned requirements files | ✓ | `OVERRIDE_REGENERATE_FREEZE` |
+| `make regenerate-lock` | Pin and checksum Python production requirements in a file | ✓ | `OVERRIDE_REGENERATE_LOCK` |
+| `make regenerate-dev-lock` | Pin and checksum Python development requirements in a file | ✓ | `OVERRIDE_REGENERATE_DEV_LOCK` |
 | `make test` | Run unit tests for all Python versions defined in `./setup.cfg`. Must be in `${PYTHON_MODULE_NAME}/tests/tests.py` | ✘ | |
 | `make test-single` | Run unit tests for the default Python version. Must be in `${PYTHON_MODULE_NAME}/tests/tests.py` | ✘ | |
 | `make upload` | Upload the distribution files generated with `make dist` to PyPI | ✘ | |
@@ -96,11 +97,10 @@ built-in Python tools except from
    The name of the project is `md-toc` (with hyphen) but the Python module is
    called `md_toc` (underscore). That is why there are two variables.
 
-3. add `Makefile` and `.dockerfile_build_python_dist` to your gitignore
+3. add `Makefile` to your gitignore
 
    ```shell
    echo 'Makefile' >> .gitignore
-   echo '.dockerfile_build_python_dist' >> .gitignore
    ```
 
 4. download the Makefile in your project. This will pull new updates from this
@@ -111,14 +111,15 @@ built-in Python tools except from
    ```
 
 5. If you are bootstrapping a project from scratch (i.e.: a new project),
-   regenerate the requirements freeze file:
+   regenerate the requirements lock files:
 
    ```shell
+   make regenerate-dev-lock
    make regenerate-lock
    ```
 
-6. install the development environment. your project must have a
-   `pyproject.toml` file
+6. install the development environment from the lock file. Your project must
+   have a `pyproject.toml` file:
 
    ```shell
    make install-dev
