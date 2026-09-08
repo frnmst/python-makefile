@@ -54,7 +54,8 @@ endif
 endif
 
 # pip-audit and pip-tools must always be in the dev dependencies.
-install-dev::
+# Install anyway even if vulnerabilities are found.
+install-dev:: uninstall-dev
 ifeq ($(OVERRIDE_INSTALL_DEV),)
 	$(VENV_NEW) \
 		&& $(VENV_ACTIVATE) \
@@ -64,11 +65,11 @@ ifeq ($(OVERRIDE_INSTALL_DEV),)
 			--requirement=$(LOCK_DEV_FILENAME) \
 		&& pip-audit \
 			--strict \
-			--requirement $(LOCK_DEV_FILENAME) \
-		&& pip install \
+			--requirement $(LOCK_DEV_FILENAME); \
+		pip install \
 			--require-venv \
 			--no-deps \
-			-e .; \
+			--editable .; \
 		$(VENV_DEACTIVATE)
 	$(VENV_ACTIVATE) \
 		&& pre-commit install; \
@@ -78,7 +79,8 @@ ifeq ($(OVERRIDE_INSTALL_DEV),)
 		$(VENV_DEACTIVATE)
 endif
 
-regenerate-lock::
+# Always start with a fresh environment when regenating lock files.
+regenerate-lock:: uninstall-dev
 ifeq ($(OVERRIDE_REGENERATE_LOCK),)
 	$(VENV_NEW) \
 		&& $(VENV_ACTIVATE) \
@@ -94,7 +96,7 @@ ifeq ($(OVERRIDE_REGENERATE_LOCK),)
 		$(VENV_DEACTIVATE)
 endif
 
-regenerate-dev-lock::
+regenerate-dev-lock:: uninstall-dev
 ifeq ($(OVERRIDE_REGENERATE_DEV_LOCK),)
 	$(VENV_NEW) \
 		&& $(VENV_ACTIVATE) \

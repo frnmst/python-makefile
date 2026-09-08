@@ -13,7 +13,6 @@ A Makefile to be used for automating Python development operations.
   - [Extra Makefile targets](#extra-makefile-targets)
   - [Reproducible builds](#reproducible-builds)
   - [License](#license)
-  - [Changelog and trusted source](#changelog-and-trusted-source)
   - [Support this project](#support-this-project)
 
 <!--TOC-->
@@ -46,6 +45,8 @@ built-in Python tools except from
 > [hatch uses uv](https://github.com/pypa/hatch/blob/hatchling-v1.30.1/pyproject.toml#L58)
 > so [build](https://pypi.org/project/build/) is the preferred build tool
 > instead.
+> See also
+> [How to create a pylock.toml lockfile](https://pydevtools.com/handbook/how-to/how-to-create-a-pylock-toml-lockfile/).
 
 ## Features
 
@@ -142,7 +143,7 @@ in the [`.project.mk`](./.project.linux.mk.example) file.
 To deterministically build your Python project inside a Docker container, run:
 
 ```shell
-make dist
+sudo make dist
 ```
 
 This also generates checksums for the wheel and source distributions.
@@ -171,18 +172,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-## Changelog and trusted source
-
-You can check the authenticity of new releases using my public key.
-
-Changelogs, instructions, sources and keys can be found at
-[blog.franco.net.eu.org/software/#python-makefile](https://blog.franco.net.eu.org/software/#python-makefile).
-
 ## Support this project
 
+- [GitHub Sponsors](https://github.com/sponsors/frnmst)
 - [Buy Me a Coffee](https://www.buymeacoffee.com/frnmst)
 - [Liberapay](https://liberapay.com/frnmst)
-- Bitcoin: `bc1qnkflazapw3hjupawj0lm39dh9xt88s7zal5mwu`
-- Monero: `84KHWDTd9hbPyGwikk33Qp5GW7o7zRwPb8kJ6u93zs4sNMpDSnM5ZTWVnUp2cudRYNT6rNqctnMQ9NbUewbj7MzCBUcrQEY`
-- Dogecoin: `DMB5h2GhHiTNW7EcmDnqkYpKs6Da2wK3zP`
-- Vertcoin: `vtc1qd8n3jvkd2vwrr6cpejkd9wavp4ld6xfu9hkhh0`
