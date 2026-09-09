@@ -12,6 +12,7 @@ A Makefile to be used for automating Python development operations.
   - [Workflow](#workflow)
   - [Extra Makefile targets](#extra-makefile-targets)
   - [Reproducible builds](#reproducible-builds)
+  - [Authenticity](#authenticity)
   - [License](#license)
   - [Support this project](#support-this-project)
 
@@ -21,8 +22,8 @@ A Makefile to be used for automating Python development operations.
 
 Makefiles are not only useful for C or C++. You can use them for pretty much
 everything. In this case, instead of writing complex commands by hand or using
-a shell script, I use a Makefile to run operations I use frequently in my
-Python projects.
+a shell script, I use a Makefile to run complex operations in my Python
+projects.
 
 ## Why not uv, Poetry, Pipenv, etc...
 
@@ -43,8 +44,9 @@ built-in Python tools except from
 
 > [!NOTE]
 > [hatch uses uv](https://github.com/pypa/hatch/blob/hatchling-v1.30.1/pyproject.toml#L58)
-> so [build](https://pypi.org/project/build/) is the preferred build tool
-> instead.
+> so [build](https://pypi.org/project/build/) or
+> [hatchling](https://pypi.org/project/hatchling/) are the preferred build
+> backend tools instead.
 > See also
 > [How to create a pylock.toml lockfile](https://pydevtools.com/handbook/how-to/how-to-create-a-pylock-toml-lockfile/).
 
@@ -104,15 +106,15 @@ built-in Python tools except from
    echo 'Makefile' >> .gitignore
    ```
 
-4. download the Makefile in your project. This will pull new updates from this
-   repository if there have been changes in the Makefile.
+4. download the Makefile in your project. The follwing pulls new updates from
+   this repository if there have been changes in the Makefile:
 
    ```shell
    make -f .project.mk bootstrap
    ```
 
-5. If you are bootstrapping a project from scratch (i.e.: a new project),
-   regenerate the requirements lock files:
+5. If you are bootstrapping a new project from scratch, regenerate the
+   requirements lock files:
 
    ```shell
    make regenerate-dev-lock
@@ -147,6 +149,12 @@ sudo make dist
 ```
 
 This also generates checksums for the wheel and source distributions.
+
+## Authenticity
+
+Python projects contain a `./safe_install.sh` script that checks the signed
+shell commands against my public GPG key and compares local hashes with the
+ones available on PyPI. Follow the instructions on respective project readmes.
 
 ## License
 
