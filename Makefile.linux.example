@@ -88,6 +88,7 @@ ifeq ($(OVERRIDE_REGENERATE_LOCK),)
 		&& pip-compile \
 			--generate-hashes \
 			--strip-extras \
+			--uploaded-prior-to=$$(date -d '-3days' -Idate) \
 			--allow-unsafe pyproject.toml \
 		    --output-file=$(LOCK_FILENAME) \
 		&& pip-audit \
@@ -105,6 +106,7 @@ ifeq ($(OVERRIDE_REGENERATE_DEV_LOCK),)
 			--extra=dev \
 			--generate-hashes \
 			--strip-extras \
+			--uploaded-prior-to=$$(date -d '-3days' -Idate) \
 			--allow-unsafe pyproject.toml \
 		    --output-file=$(LOCK_DEV_FILENAME) \
 		&& pip-audit \

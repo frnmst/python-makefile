@@ -10,6 +10,7 @@ A Makefile to be used for automating Python development operations.
   - [Features](#features)
   - [Built-in commands](#built-in-commands)
   - [Workflow](#workflow)
+  - [Security](#security)
   - [Extra Makefile targets](#extra-makefile-targets)
   - [Reproducible builds](#reproducible-builds)
   - [Authenticity](#authenticity)
@@ -127,6 +128,12 @@ built-in Python tools except from
    ```shell
    make install-dev
    ```
+
+## Security
+
+To mitigate supply chain attacks, as suggested by
+[this PyPI blog post](https://blog.pypi.org/posts/2026-04-02-incident-report-litellm-telnyx-supply-chain-attack/), dependency cooldown was added in python-makefile 0.3.0 via the
+`--uploaded-prior-to` pip option.
 
 ## Extra Makefile targets
 
