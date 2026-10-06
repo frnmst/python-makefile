@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024-2026 Franco Masotti (See /README.md)
+#
+# SPDX-License-Identifier: MIT
+
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
@@ -23,6 +27,33 @@ repos:
     - id: double-quote-string-fixer
     - id: mixed-line-ending
       args: ['--fix=lf']
+
+- repo: https://codeberg.org/fsfe/reuse-tool
+  rev: 'v6.2.0'
+  hooks:
+    - id: reuse
+      name: License compliance
+      entry: reuse annotate
+      args:
+        - --license
+        - MIT
+        - --copyright
+        - "Franco Masotti (See /README.md)"
+        - --year
+        - "2024-2026"
+        - --skip-unrecognized
+      pass_filenames: true
+      exclude: |
+        (?x)(
+          ^docs/assets/|
+          ^assets/|
+          ^\.project.mk|
+          ^\.github/FUNDING.yml|
+          ^packages/|
+          ^pyproject\.toml|
+          ^safe_install\.sh|
+          .*\.lock
+        )
 
 # YAPF and flake8 need to remain pinned.
 - repo: https://github.com/google/yapf
@@ -54,11 +85,11 @@ repos:
   hooks:
     - id: pyupgrade
 
-- repo: https://codeberg.org/frnmst/md-toc
-  rev: '9.0.0'
+- repo: https://github.com/frnmst/md-toc
+  rev: '9.1.0'
   hooks:
     - id: md-toc
-      args: ['-p', 'cmark', '-l6']
+      args: ['-t', '-p', 'cmark', '-l6']
 
 - repo: https://github.com/jorisroovers/gitlint
   rev: 'v0.19.1'

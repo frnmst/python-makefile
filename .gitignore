@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024-2026 Franco Masotti (See /README.md)
+#
+# SPDX-License-Identifier: MIT
+
 Dockerfile.python3.13_hatchling.build
 *.md
 *.MD

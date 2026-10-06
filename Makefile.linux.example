@@ -1,31 +1,11 @@
 #
-# Makefile
+# SPDX-FileCopyrightText: 2024-2026 Franco Masotti (See /README.md)
 #
-# MIT License
-#
-# Copyright (C) 2024-2026 Franco Masotti (see /README.md)
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# SPDX-License-Identifier: MIT
 
 ARCH := $$(uname --kernel-name --kernel-release --kernel-version --machine)
 PYTHON_VERSION := $$(python --version)
-PIP_VERSION := $$(pip --version | awk '{print $$1,$$2}')
+PIP_VERSION_MAJOR := $$(pip --version | awk '{print $$2}' | cut --delimiter='.' --fields=1)
 
 # See
 # https://docs.python.org/3/library/venv.html#how-venvs-work
@@ -34,6 +14,13 @@ VENV_ACTIVATE := . .venv/bin/activate
 VENV_DEACTIVATE := deactivate
 LOCK_DEV_FILENAME := $$(uname -s | tr '[:upper:]' '[:lower:]')-py$$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')-requirements-dev.lock
 LOCK_FILENAME := $$(uname -s | tr '[:upper:]' '[:lower:]')-py$$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')-requirements.lock
+
+# Version 26 instroduced `--uploaded-prior-to`.
+ifeq ($(shell test $(PIP_VERSION_MAJOR) -ge 26 && echo true),true)
+	PIP_ARGS := --pip-args="--uploaded-prior-to=$$(date -d '-3days' -Idate)"
+else
+	PIP_ARGS :=
+endif
 
 include .project.mk
 
@@ -47,14 +34,13 @@ ifeq ($(wildcard docs/.),)
 	@exit 1
 else
 	$(VENV_ACTIVATE) \
-		&& $(MAKE) -C docs html \
-		&& $(MAKE) -C docs latexpdf; \
+		&& $(MAKE) -C docs html; \
 		$(VENV_DEACTIVATE)
 endif
 endif
 
 # pip-audit and pip-tools must always be in the dev dependencies.
-# Install anyway even if vulnerabilities are found.
+# Install anyway even if vulnerabilities are found: just tell it to the user.
 install-dev:: uninstall-dev
 ifeq ($(OVERRIDE_INSTALL_DEV),)
 	$(VENV_NEW) \
@@ -88,9 +74,9 @@ ifeq ($(OVERRIDE_REGENERATE_LOCK),)
 		&& pip-compile \
 			--generate-hashes \
 			--strip-extras \
-			--uploaded-prior-to=$$(date -d '-3days' -Idate) \
 			--allow-unsafe pyproject.toml \
 		    --output-file=$(LOCK_FILENAME) \
+			$(PIP_ARGS) \
 		&& pip-audit \
 			--strict \
 			--requirement $(LOCK_FILENAME); \
@@ -106,9 +92,9 @@ ifeq ($(OVERRIDE_REGENERATE_DEV_LOCK),)
 			--extra=dev \
 			--generate-hashes \
 			--strip-extras \
-			--uploaded-prior-to=$$(date -d '-3days' -Idate) \
 			--allow-unsafe pyproject.toml \
 		    --output-file=$(LOCK_DEV_FILENAME) \
+			$(PIP_ARGS) \
 		&& pip-audit \
 			--strict \
 			--requirement $(LOCK_DEV_FILENAME); \
@@ -128,8 +114,8 @@ ifeq ($(OVERRIDE_UPDATE),)
 			--repo https://github.com/pre-commit/pre-commit-hooks \
 			--repo https://github.com/PyCQA/bandit \
 			--repo https://github.com/pycqa/isort \
-			--repo https://codeberg.org/frnmst/md-toc \
-			--repo https://github.com/mgedmin/check-manifest \
+			--repo https://github.com/frnmst/md-toc \
+			--repo https://github.com/ljnsn/cz-conventional-gitmoji \
 			--repo https://github.com/jorisroovers/gitlint; \
 		$(VENV_DEACTIVATE)
 endif
@@ -216,6 +202,8 @@ ifeq ($(OVERRIDE_CLEAN),)
 		! -name 'README.md' \
 		! -name 'CONTRIBUTING.md' \
 		! -name 'SECURITY.md' \
+		! -name 'CHANGELOG.md' \
+		! -name 'API.md' \
 		! -path './.venv/*' \
 		! -path './.git/*' -type f -exec rm -f {} +
 ifneq ($(wildcard docs/.),)

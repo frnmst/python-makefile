@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024-2026 Franco Masotti (See /README.md)
+
+SPDX-License-Identifier: MIT
+-->
+
 # python-makefile
 
 A Makefile to be used for automating Python development operations.
@@ -6,16 +12,19 @@ A Makefile to be used for automating Python development operations.
 
 - [python-makefile](#python-makefile)
   - [Description](#description)
-  - [Why not uv, Poetry, Pipenv, etc...](#why-not-uv-poetry-pipenv-etc)
   - [Features](#features)
+  - [Why not uv, Poetry, Pipenv, etc...](#why-not-uv-poetry-pipenv-etc)
+  - [Quickstart](#quickstart)
   - [Built-in commands](#built-in-commands)
-  - [Workflow](#workflow)
+  - [Setup and workflow](#setup-and-workflow)
   - [Security](#security)
   - [Extra Makefile targets](#extra-makefile-targets)
   - [Reproducible builds](#reproducible-builds)
   - [Authenticity](#authenticity)
   - [License](#license)
+  - [Git forge mirrors](#git-forge-mirrors)
   - [Support this project](#support-this-project)
+<!-- TOC by https://github.com/frnmst/md-toc ver. 9.1.0 -->
 
 <!--TOC-->
 
@@ -26,13 +35,28 @@ everything. In this case, instead of writing complex commands by hand or using
 a shell script, I use a Makefile to run complex operations in my Python
 projects.
 
+## Features
+
+- setup and remove a development environment using venv
+- lock requirements with hashes to make the development and production
+  environments partially reproducible
+- run tests, benchmarks, fuzzer and demo
+- build package (wheel and dist) in Docker, using reproducible instructions
+- upload to PyPI
+- build documentation
+- setup, update and run pre-commit hooks
+- cleanup
+- no AI features, no hallucinations, no tokens, no costs
+
 ## Why not uv, Poetry, Pipenv, etc...
 
 Those are non standard built-in tools:
 
-- uv is now owned by OpenAI so it's dangerous in terms of vendor lock-in and
-  rug-pulls
-- Pipenv had [huge problems during the lock file phase](https://github.com/pypa/pipenv/issues?q=is%3Aissue%20lock%20failed); that was the first reason I stopped using it
+- uv is now
+  [owned by OpenAI](https://openai.com/index/openai-to-acquire-astral/) so it's
+  dangerous in terms of vendor lock-in and possible rug-pulls
+- Pipenv had
+  [huge problems during the lock file phase](https://github.com/pypa/pipenv/issues?q=is%3Aissue%20lock%20failed); that was the first reason I stopped using it years ago
 - Poetry is complex, as stated in
   [their readme](https://github.com/python-poetry/poetry#contribute)
   > Poetry is a large, complex project always in need of contributors
@@ -43,6 +67,9 @@ goes mainstream, this Makefile will be even simpler, possibily only requiring
 built-in Python tools except from
 [pip-audit](https://pypi.org/project/pip-audit/).
 
+python-makefile tries to use as much standard tools as possible, and prepares
+a workflow for you
+
 > [!NOTE]
 > [hatch uses uv](https://github.com/pypa/hatch/blob/hatchling-v1.30.1/pyproject.toml#L58)
 > so [build](https://pypi.org/project/build/) or
@@ -51,15 +78,19 @@ built-in Python tools except from
 > See also
 > [How to create a pylock.toml lockfile](https://pydevtools.com/handbook/how-to/how-to-create-a-pylock-toml-lockfile/).
 
-## Features
+## Quickstart
 
-- setup and remove a development environment using venv
-- lock requirements with hashes
-- run tests, benchmarks, fuzzer and demo
-- upload to PyPI
-- build documentation
-- setup, update and run pre-commit hooks
-- cleanup
+After [setting up python-makefile](#setup-and-workflow) once for your project, all you
+have to do is:
+
+```shell
+make regenerate-dev-lock
+make regenerate-lock
+make install-dev
+```
+
+These commands create dependency lock files and an up-to-date virtual
+environment in `.venv/`.
 
 ## Built-in commands
 
@@ -81,25 +112,24 @@ built-in Python tools except from
 | `make upload` | Upload the distribution files generated with `make dist` to PyPI | ✘ | |
 | `make uninstall-dev` | Remove the development environment | ✓ | `OVERRIDE_UNINSTALL_DEV` |
 
-## Workflow
+## Setup and workflow
 
-1. install [curl](https://curl.se/). On Debian-based systems:
-
-   ```shell
-   apt install curl
-   ```
-
-2. create a [`.project.mk`](./.project.linux.mk.example) file in your repository
+1. install [curl](https://curl.se/) and make. On Debian-based systems:
 
    ```shell
-   curl -o .project.mk https://codeberg.org/frnmst/python-makefile/raw/branch/master/.project.linux.mk.example
+   apt install curl make
    ```
 
-   In this example we are setting up the
-   [md-toc](https://codeberg.org/frnmst/md-toc) project.
+2. download the [`.project.mk`](./.project.linux.mk.example) file in your
+   repository
 
-   The name of the project is `md-toc` (with hyphen) but the Python module is
-   called `md_toc` (underscore). That is why there are two variables.
+   ```shell
+   curl -o .project.mk https://github.com/frnmst/python-makefile/raw/branch/master/.project.linux.mk.example
+   ```
+
+   In the example file [md-toc](https://github.com/frnmst/md-toc) is used as
+   project: the name of the project is `md-toc` (hyphen) but the Python
+   module is called `md_toc` (underscore). That is why there are two variables.
 
 3. add `Makefile` to your gitignore
 
@@ -107,15 +137,17 @@ built-in Python tools except from
    echo 'Makefile' >> .gitignore
    ```
 
-4. download the Makefile in your project. The follwing pulls new updates from
-   this repository if there have been changes in the Makefile:
+4. download the Makefile in your project. The follwing also
+   **pulls new updates** from this repository if there have been changes in the
+   Makefile:
 
    ```shell
    make -f .project.mk bootstrap
    ```
 
 5. If you are bootstrapping a new project from scratch, regenerate the
-   requirements lock files:
+   requirements lock files. You might want to do this again when updates or
+   dependency changes are required:
 
    ```shell
    make regenerate-dev-lock
@@ -129,6 +161,9 @@ built-in Python tools except from
    make install-dev
    ```
 
+   If you clone a project that uses python-makefile this is essentially all
+   you have to do
+
 ## Security
 
 To mitigate supply chain attacks, as suggested by
@@ -137,15 +172,17 @@ To mitigate supply chain attacks, as suggested by
 
 ## Extra Makefile targets
 
-You can also create new targets in [`.project.mk`](./.project.mk.example) and
-run them
+You can also create new custom targets in
+[`.project.mk`](./.project.linux.mk.example) and run them
 
 ```shell
 make example-target
 ```
 
-Overriding is simple: just add your overridden target and the override variable
-in the [`.project.mk`](./.project.linux.mk.example) file.
+Similarly, overriding is just as simple: just add your overridden target and
+the override variable in the [`.project.mk`](./.project.linux.mk.example) file.
+
+Remember that `.project.mk` is Git tracked while `Makefile` is not.
 
 ## Reproducible builds
 
@@ -159,9 +196,10 @@ This also generates checksums for the wheel and source distributions.
 
 ## Authenticity
 
-Python projects contain a `./safe_install.sh` script that checks the signed
-shell commands against my public GPG key and compares local hashes with the
-ones available on PyPI. Follow the instructions on respective project readmes.
+Some of my Python projects contain a `./safe_install.sh` script that checks the
+signed shell commands against my public GPG key and compares local hashes with
+the ones available on PyPI. Follow the instructions on respective project
+readmes.
 
 ## License
 
@@ -186,6 +224,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Git forge mirrors
+
+| URL | Type | Notes |
+|-----|------|-------|
+| https://github.com/frnmst/python-makefile | RW | Official home |
+| https://codeberg.org/frnmst/python-makefile | RW | Mirror |
+| https://framagit.org/frnmst/python-makefile | RW | Mirror |
+| https://repos.franco.net.eu.org/frnmst/python-makefile | RW | Mirror |
 
 ## Support this project
 

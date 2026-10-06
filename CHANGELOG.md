@@ -1,7 +1,7 @@
 <!--
-SPDX-FileCopyrightText: 2026-2026 Franco Masotti (See /README.md)
+SPDX-FileCopyrightText: 2024-2026 Franco Masotti (See /README.md)
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 -->
 
 # Changelog
@@ -15,17 +15,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [Changelog](#changelog)
   - [\[Unreleased\]](#unreleased)
-  - [\[0.3.0\] - 2026-09-25](#030---2026-09-25)
+  - [\[0.4.0\] - 2026-10-06](#040---2026-10-06)
     - [Fixed](#fixed)
-  - [\[0.2.0\] - 2026-09-09](#020---2026-09-09)
-    - [Fixed](#fixed-1)
-    - [Changed](#changed)
-  - [\[0.1.0\] - 2026-06-24](#010---2026-06-24)
     - [Added](#added)
+    - [Changed](#changed)
+    - [Removed](#removed)
+  - [\[0.3.0\] - 2026-09-25](#030---2026-09-25)
+    - [Fixed](#fixed-1)
+  - [\[0.2.0\] - 2026-09-09](#020---2026-09-09)
+    - [Fixed](#fixed-2)
+    - [Changed](#changed-1)
+  - [\[0.1.0\] - 2026-06-24](#010---2026-06-24)
+    - [Added](#added-1)
+<!-- TOC by https://github.com/frnmst/md-toc ver. 9.1.0 -->
 
 <!--TOC-->
 
 ## [Unreleased]
+
+## [0.4.0] - 2026-10-06
+
+### Fixed
+
+- Dependency cooldown option now works only for compatible pip versions (>=26).
+- Cleanup documentation.
+
+### Added
+
+- Add repository metadata files.
+
+### Changed
+
+- Repository structure now mirrors up-to-date standards.
+
+### Removed
+
+- Remove `latexpdf` from docs build commands because it's not used.
 
 ## [0.3.0] - 2026-09-25
 

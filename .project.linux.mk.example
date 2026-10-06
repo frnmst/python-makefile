@@ -1,15 +1,15 @@
-# python-makefile
-# MIT License
-# Copyright (C) 2024-2026 Franco Masotti (see /README.md)
-# https://software.franco.net.eu.org/frnmst/python-makefile
+#
+# SPDX-FileCopyrightText: 2024-2026 Franco Masotti (See /README.md)
+#
+# SPDX-License-Identifier: MIT
 
 # Change these two. Required.
 PROJECT_NAME := md-toc
 PYTHON_MODULE_NAME := md_toc
 
 # Required.
-MAKEFILE_SOURCE := https://repos.franco.net.eu.org/frnmst/python-makefile/raw/branch/master/Makefile.linux.example
-DOCKER_BUILD_PYTHON_DIST_SOURCE := https://repos.franco.net.eu.org/frnmst/python-makefile/raw/branch/master/.dockerfile_build_python_dist.example
+MAKEFILE_SOURCE := https://github.com/frnmst/python-makefile/raw/branch/master/Makefile.linux.example
+DOCKER_BUILD_PYTHON_DIST_SOURCE := https://github.com/frnmst/python-makefile/raw/branch/master/.dockerfile_build_python_dist.example
 bootstrap:
 	curl -o Makefile $(MAKEFILE_SOURCE)
 	curl -o .dockerfile_build_python_dist $(DOCKER_BUILD_PYTHON_DIST_SOURCE)
